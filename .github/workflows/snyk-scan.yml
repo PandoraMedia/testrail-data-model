@@ -1,0 +1,21 @@
+name: Example workflow for Python using Snyk
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '17 13 * * *'
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif --fail-on=upgradable

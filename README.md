@@ -2,6 +2,9 @@ TestRail Data Model
 ===================
 
 [![Python package][gh-action-python-package-badge]][gh-action-python-package]
+[![PyPI][pypi-latest-release-badge]][pypi]
+[![PyPI - Python Version][pypi-python-versions-badge]][pypi]
+[![PyPI - Implementation][pypi-implementations-badge]][pypi]
 [![License][license-badge]][license-link]
 
 This package provides an object-oriented representation of TestRail data using
@@ -54,3 +57,7 @@ Authors
 [gh-action-python-package-badge]: https://github.com/PandoraMedia/testrail-data-model/actions/workflows/python-package.yml/badge.svg
 [license-badge]: https://img.shields.io/badge/License-Apache_2.0-blue.svg
 [license-link]: https://raw.githubusercontent.com/PandoraMedia/testrail-data-model/master/LICENSE
+[pypi]: https://pypi.org/project/testrail-data-model/
+[pypi-latest-release-badge]: https://img.shields.io/pypi/v/testrail-data-model?color=blue&label=pypi&logo=version
+[pypi-implementations-badge]: https://img.shields.io/pypi/implementation/testrail-data-model
+[pypi-python-versions-badge]: https://img.shields.io/pypi/pyversions/testrail-data-model.svg

@@ -1,3 +1,4 @@
+---
 # This workflow will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
@@ -9,17 +10,13 @@
 name: Upload Python Package
 
 on:
-  release:
-    types: [published]
-
-permissions:
-  contents: read
+  push:
+    tags:
+      - '*'
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -36,6 +33,12 @@ jobs:
     - name: Build wheel
       run: |
         find ./dist -name "*.tar.gz" | xargs python -m pip wheel --no-deps --wheel-dir ./dist
+    - name: Publish release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "dist/*.whl,dist/*.tar.gz"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        omitBody: true
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
       with:

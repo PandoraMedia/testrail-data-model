@@ -3,6 +3,7 @@ TestRail Data Model
 
 [![Python package][gh-action-python-package-badge]][gh-action-python-package]
 [![PyPI][pypi-latest-release-badge]][pypi]
+[![Downloads][pepy-downloads-badge]][pepy-downloads-link]
 [![PyPI - Python Version][pypi-python-versions-badge]][pypi]
 [![PyPI - Implementation][pypi-implementations-badge]][pypi]
 [![License][license-badge]][license-link]
@@ -61,3 +62,5 @@ Authors
 [pypi-latest-release-badge]: https://img.shields.io/pypi/v/testrail-data-model?color=blue&label=pypi&logo=version
 [pypi-implementations-badge]: https://img.shields.io/pypi/implementation/testrail-data-model
 [pypi-python-versions-badge]: https://img.shields.io/pypi/pyversions/testrail-data-model.svg
+[pepy-downloads-badge]: https://static.pepy.tech/personalized-badge/testrail-data-model?period=total&units=international_system&left_color=gray&right_color=blue&left_text=Downloads
+[pepy-downloads-link]: https://pepy.tech/project/testrail-data-model

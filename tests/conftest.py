@@ -1,20 +1,45 @@
+import logging
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call, patch
 
 from mimesis.schema import Schema, Field
 from mimesis.locales import Locale
+from testrail_api import TestRailAPI
+
 
 from testrail_data_model.stats import TestRailAPIRequestStats
-from testrail_data_model.model import TestRailCaseFieldType
+from testrail_data_model.adapter import TestRailAPIAdapter
+from testrail_data_model.builder import TestRailAPIObjectBuilder
+from testrail_data_model.model import (
+    TestRailProject,
+    TestRailSuite,
+    TestRailSection,
+    TestRailCase,
+    TestRailCaseField,
+    TestRailCaseType,
+    TestRailCaseFieldType
+)
 
 FIELD = Field(Locale.EN)
 
 # Prevent pytest from trying to collect these classes
 for item in [
+    TestRailAPI,
+    TestRailAPIAdapter,
     TestRailAPIRequestStats,
-    TestRailCaseFieldType,
+    TestRailAPIObjectBuilder,
+    TestRailProject,
+    TestRailSuite,
+    TestRailSection,
+    TestRailCase,
+    TestRailCaseField,
+    TestRailCaseType,
+    TestRailCaseFieldType
 ]:
     item.__test__ = False
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
 def get_project_response():
@@ -192,3 +217,25 @@ def mock_api_client():
         )
     )
     return api
+
+
+@pytest.fixture
+def suite_fixture():
+    suite = TestRailSuite.from_data(get_suite_response())
+    section1 = TestRailSection.from_data(get_section_response())
+    section2 = TestRailSection.from_data(get_section_response())
+    case1 = TestRailCase.from_data(get_case_response())
+    case2 = TestRailCase.from_data(get_case_response())
+    section2.suite_id = suite.suite_id
+    section2.parent_id = section1.section_id
+    section1.suite_id = suite.suite_id
+    section1.parent_id = None
+    case1.suite_id = suite.suite_id
+    case1.section_id = section2.section_id
+    case2.suite_id = suite.suite_id
+    case2.section_id = section2.section_id
+    case1.link(suite=suite, section=section2)
+    case2.link(suite=suite, section=section2)
+    section1.link(suite=suite, parent=None)
+    section2.link(suite=suite, parent=section1)
+    return suite

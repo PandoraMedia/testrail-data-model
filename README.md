@@ -22,16 +22,20 @@ Example
 from testrail_api import TestRailAPI
 
 from testrail_data_model.builder import TestRailAPIObjectBuilder
-from testrail_data_model.model import TestRailSection, TestRailCase
+from testrail_data_model.adapter import TestRailAPIAdapter
+from testrail_data_model.model import TestRailSection, TestRailCase, TestRailSuite
 
 # From testrail-api client library
-api = TestRailAPI(url="https://testrail-instance.com", email="email@email.org", password="password")
+api_client = TestRailAPI(url="https://testrail-instance.com", email="email@email.org", password="password")
 
-# For building the TestRail dataclass object instances
-builder = TestRailAPIObjectBuilder(api_client=api)
+# Performs API requests and tracks stats
+adapter = TestRailAPIAdapter(api_client=api_client)
+
+# For building the TestRail dataclass object hierarchies (e.g. TestRailSuite)
+builder = TestRailAPIObjectBuilder(adapter=adapter)
 
 # Construct a TestRailSuite object linked to its associated TestRailSection and TestRailCase objects
-suite = builder.build_suite(project_id=1, suite_id=1)
+suite: TestRailSuite = builder.build_suite(project_id=1, suite_id=1)
 
 # Display the TestRailSuite object structure
 for section_id, section in suite.sections.items():
@@ -42,7 +46,7 @@ for section_id, section in suite.sections.items():
        print("Case", case_id, case.title)
 
 # Show the number of API requests made
-print(builder.stats)
+print(adapter.stats)
 ```
 
 Authors

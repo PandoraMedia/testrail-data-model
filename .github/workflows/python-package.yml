@@ -31,7 +31,7 @@ jobs:
         python -m pip install -r requirements.txt -r dev-requirements.txt
     - name: Lint
       run: |
-        python -m pylint testrail_data_model
+        python -m pylint $(git ls-files '*.py' | grep -v 'tests/')
     - name: Test with pytest
       run: |
         coverage run -m pytest tests

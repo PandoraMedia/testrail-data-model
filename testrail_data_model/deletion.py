@@ -22,11 +22,8 @@ from abc import ABC, abstractmethod
 from functools import lru_cache
 from typing import Tuple, List, Optional, Generator
 
-from testrail_api import TestRailAPI
-
 from .model import TestRailSuite, TestRailCase, TestRailSection
-from .stats import TestRailAPIRequestStats
-from .builder import TestRailAPIObjectBuilder
+from .adapter import TestRailAPIAdapter
 
 logger = logging.getLogger(__package__)
 
@@ -37,33 +34,22 @@ class BaseDeletionHandler(ABC):
 
     :param suite: Hierarchy of TestRailSection and TestRailCase instances
     :type suite: TestRailSuite
-    :param api_client: TestRail client API object
-    :type api_client: TestRailAPI
-    :param stats: For tracking TestRail request metrics
-    :type stats: TestRailAPIRequestStats
+    :param adapter: Object for interacting with TestRail API
+    :type adapter: TestRailAPIAdapter
     """
 
-    def __init__(self, suite: TestRailSuite, api_client: TestRailAPI, stats: Optional[TestRailAPIRequestStats] = None):
+    def __init__(self, suite: TestRailSuite, adapter: TestRailAPIAdapter):
         """Constructor"""
         self._suite = suite
-        self._api_client = api_client
-        self._stats = stats or TestRailAPIRequestStats()
+        self._adapter = adapter
 
     @property
-    def api_client(self) -> TestRailAPI:
+    def adapter(self) -> TestRailAPIAdapter:
         """
         :return: Object for interacting with the TestRail API
-        :rtype: TestRailAPI
+        :rtype: TestRailAPIAdapter
         """
-        return self._api_client
-
-    @property
-    def stats(self) -> TestRailAPIRequestStats:
-        """
-        :return: Object tracking TestRail API request metrics
-        :rtype: TestRailAPIRequestStats
-        """
-        return self._stats
+        return self._adapter
 
     @abstractmethod
     def delete_section(self, section: TestRailSection):
@@ -120,18 +106,15 @@ class DeletionHandler(BaseDeletionHandler):
 
     :param suite: Hierarchy of TestRailSection and TestRailCase instances
     :type suite: TestRailSuite
-    :param api_client: TestRail client API object
-    :type api_client: TestRailAPI
-    :param stats: For tracking TestRail request metrics
-    :type stats: TestRailAPIRequestStats
+    :param adapter: instance of adapter object for interacting with TestRail API
+    :type adapter: TestRailAPIAdapter
     :param soft: True to not actually perform deletion, False to really perform deletion (default: False)
     :type soft: bool
     """
 
-    def __init__(self, suite: TestRailSuite, api_client: TestRailAPI, stats: Optional[TestRailAPIRequestStats] = None,
-                 soft: bool = False):
+    def __init__(self, suite: TestRailSuite, adapter: TestRailAPIAdapter, soft: bool = False):
         """Constructor"""
-        super().__init__(suite=suite, api_client=api_client, stats=stats)
+        super().__init__(suite=suite, adapter=adapter)
         self._soft = soft
 
     @property
@@ -150,10 +133,7 @@ class DeletionHandler(BaseDeletionHandler):
         :type section: TestRailSection
         """
         logger.debug("Deleting TestRailSection: %s", section)
-        self.stats.delete_section += 1
-        self.api_client.sections.delete_section(section_id=section.section_id, soft=int(self.soft))
-        if not self.soft:
-            section.unlink()
+        self._adapter.delete_section(section=section, soft=self.soft)
 
     def delete_case(self, case: TestRailCase):
         """
@@ -163,10 +143,7 @@ class DeletionHandler(BaseDeletionHandler):
         :type case: TestRailCase
         """
         logger.debug("Deleting TestRailCase: %s", case)
-        self.stats.delete_case += 1
-        self.api_client.cases.delete_case(case_id=case.case_id, soft=int(self.soft))
-        if not self.soft:
-            case.unlink()
+        self._adapter.delete_case(case=case, soft=self.soft)
 
     def delete_sections(self, sections: List[TestRailSection]) -> Generator:
         """
@@ -209,21 +186,16 @@ class MarkForDeletionHandler(BaseDeletionHandler):
 
     :param suite: Hierarchy of TestRailSection and TestRailCase instances
     :type suite: TestRailSuite
-    :param builder: Used to create new TestRail API object instances
-    :type builder: TestRailAPIObjectBuilder
-    :param api_client: TestRail client API object
-    :type api_client: TestRailAPI
-    :param stats: For tracking TestRail request metrics
-    :type stats: TestRailAPIRequestStats
+    :param adapter: Instance of adapter to interact with TestRail API
+    :type adapter: TestRailAPIAdapter
     :param to_be_deleted_section_name: name of the special section which holds cases marked for deletion
     :type to_be_deleted_section_name: Optional[str], default None
     """
 
-    def __init__(self, suite: TestRailSuite, builder: TestRailAPIObjectBuilder, api_client: TestRailAPI,
-                 stats: Optional[TestRailAPIRequestStats] = None, to_be_deleted_section_name: Optional[str] = None):
+    def __init__(self, suite: TestRailSuite, adapter: TestRailAPIAdapter,
+                 to_be_deleted_section_name: Optional[str] = None):
         """Constructor"""
-        super().__init__(suite=suite, api_client=api_client, stats=stats)
-        self._builder = builder
+        super().__init__(suite=suite, adapter=adapter)
         self._to_be_deleted_section_name = to_be_deleted_section_name or "__to_be_deleted__"
 
     def delete_section(self, section: TestRailSection) -> TestRailSection:
@@ -237,12 +209,7 @@ class MarkForDeletionHandler(BaseDeletionHandler):
         """
         _, to_be_deleted_sections_section = self.to_be_deleted_sections
         logger.debug("Marking section for deletion: %s", section)
-        self.stats.move_section += 1
-        self.api_client.sections.move_section(
-            section_id=section.section_id,
-            parent_id=to_be_deleted_sections_section.section_id
-        )
-        section.move(new_parent=to_be_deleted_sections_section)
+        self.adapter.move_section(section=section, new_parent=to_be_deleted_sections_section)
         return section
 
     def delete_case(self, case: TestRailCase) -> TestRailCase:
@@ -257,7 +224,7 @@ class MarkForDeletionHandler(BaseDeletionHandler):
         to_be_deleted_section, _ = self.to_be_deleted_sections
         kwargs = {"section_id": to_be_deleted_section.section_id}
         logger.debug("Marking case for deletion: %s", case)
-        moved_case = self._builder.update_case(case=case, **kwargs)
+        moved_case = self.adapter.update_case(case=case, **kwargs)
         case.unlink()
         moved_case.link(suite=self._suite, section=to_be_deleted_section)
         return moved_case
@@ -320,15 +287,14 @@ class MarkForDeletionHandler(BaseDeletionHandler):
         for path in ensure_paths:
             section = self._suite.section_for_path(path)
             if section is None:
-                section = self._builder.create_new_section_for_path(self._suite, path)
+                section = self.adapter.create_new_section_for_path(self._suite, path)
             needed_sections.append(section)
         return needed_sections[0], needed_sections[1]
 
 
 def deletion_handler_factory(
         suite: TestRailSuite,
-        api_client: TestRailAPI,
-        builder: Optional[TestRailAPIObjectBuilder] = None,
+        adapter: TestRailAPIAdapter,
         **settings
 ) -> BaseDeletionHandler:
     """
@@ -336,21 +302,18 @@ def deletion_handler_factory(
 
     :param suite: Hierarchy of TestRailSection and TestRailCase instances
     :type suite: TestRailSuite
-    :param api_client: TestRail client API object
-    :type api_client: TestRailAPI
-    :param builder: Used to create new TestRail API object instances (default: None)
-    :type builder: TestRailAPIObjectBuilder
+    :param adapter: adapter object for interacting with TestRail API
+    :type adapter: TestRailAPIAdapter
     :param settings: kwargs for configuring additional behaviors
     :type settings: Dict
     :return: An implementation of the DeletionHandler abstract base class
     :rtype: BaseDeletionHandler
     """
     if settings.get("mark_for_deletion", True):
-        builder = builder or TestRailAPIObjectBuilder(api_client=api_client)
         to_be_deleted_section_name = settings.get("mark_for_deletion_section_name", None)
-        deletion_handler = MarkForDeletionHandler(suite=suite, api_client=api_client, builder=builder,
+        deletion_handler = MarkForDeletionHandler(suite=suite, adapter=adapter,
                                                   to_be_deleted_section_name=to_be_deleted_section_name)
     else:
         soft = settings.get("soft", True)
-        deletion_handler = DeletionHandler(suite=suite, api_client=api_client, soft=soft)
+        deletion_handler = DeletionHandler(suite=suite, adapter=adapter, soft=soft)
     return deletion_handler

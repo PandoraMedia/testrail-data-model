@@ -1,5 +1,5 @@
 """
-Module to track stats about interactions with the TestRail API
+setup.py for testrail-data-model
 
 Copyright 2022 SiriusXM-Pandora
 
@@ -15,10 +15,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-
-from setuptools import setup, find_packages
-
 from pathlib import Path
+from setuptools import setup, find_packages
 
 from pbr.packaging import (
     get_version,
@@ -30,12 +28,12 @@ readme = Path(".", "README.md").absolute()
 with readme.open("r", encoding="utf-8") as file:
     long_description = file.read()
 
-package_name = 'testrail-data-model'
+PACKAGE_NAME = 'testrail-data-model'
 pkgs = find_packages(exclude=["tests"])
-version = get_version(package_name=package_name)
+version = get_version(package_name=PACKAGE_NAME)
 
 setup(
-    name=package_name,
+    name=PACKAGE_NAME,
     author="Elliot Weiser",
     author_email="elliot.weiser@gmail.com",
     packages=pkgs,
@@ -68,5 +66,4 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/PandoraMedia/testrail-data-model"
-
 )

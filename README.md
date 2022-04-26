@@ -7,6 +7,7 @@ TestRail Data Model
 [![PyPI - Python Version][pypi-python-versions-badge]][pypi]
 [![PyPI - Implementation][pypi-implementations-badge]][pypi]
 [![License][license-badge]][license-link]
+[![Coverage Status][coveralls-badge]][coveralls-link]
 
 This package provides an object-oriented representation of TestRail data using
 Python [data classes][python-dataclasses]. This object structure facilitates the development
@@ -55,16 +56,18 @@ Authors
 * [Rob Whitlock](https://github.com/robwhitlock666)
 * [Rong Zheng](https://github.com/rzheng7)
 
-[python-dataclasses]: https://docs.python.org/3/library/dataclasses.html
-[gurock-testrail-api-documentation]: https://www.gurock.com/testrail/docs/api/
-[tolstislon-testrail-api]: https://github.com/tolstislon/testrail-api
+[coveralls-badge]: https://coveralls.io/repos/github/PandoraMedia/testrail-data-model/badge.svg
+[coveralls-link]: https://coveralls.io/github/PandoraMedia/testrail-data-model
 [gh-action-python-package]: https://github.com/PandoraMedia/testrail-data-model/actions/workflows/python-package.yml
 [gh-action-python-package-badge]: https://github.com/PandoraMedia/testrail-data-model/actions/workflows/python-package.yml/badge.svg
+[gurock-testrail-api-documentation]: https://www.gurock.com/testrail/docs/api/
 [license-badge]: https://img.shields.io/badge/License-Apache_2.0-blue.svg
 [license-link]: https://raw.githubusercontent.com/PandoraMedia/testrail-data-model/master/LICENSE
+[pepy-downloads-badge]: https://static.pepy.tech/personalized-badge/testrail-data-model?period=total&units=international_system&left_color=gray&right_color=blue&left_text=Downloads
+[pepy-downloads-link]: https://pepy.tech/project/testrail-data-model
 [pypi]: https://pypi.org/project/testrail-data-model/
 [pypi-latest-release-badge]: https://img.shields.io/pypi/v/testrail-data-model?color=blue&label=pypi&logo=version
 [pypi-implementations-badge]: https://img.shields.io/pypi/implementation/testrail-data-model
 [pypi-python-versions-badge]: https://img.shields.io/pypi/pyversions/testrail-data-model.svg
-[pepy-downloads-badge]: https://static.pepy.tech/personalized-badge/testrail-data-model?period=total&units=international_system&left_color=gray&right_color=blue&left_text=Downloads
-[pepy-downloads-link]: https://pepy.tech/project/testrail-data-model
+[python-dataclasses]: https://docs.python.org/3/library/dataclasses.html
+[tolstislon-testrail-api]: https://github.com/tolstislon/testrail-api

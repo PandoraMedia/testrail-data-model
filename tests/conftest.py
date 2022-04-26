@@ -17,7 +17,6 @@ from testrail_data_model.model import (
     TestRailCase,
     TestRailCaseField,
     TestRailCaseType,
-    TestRailCaseFieldType
 )
 
 FIELD = Field(Locale.EN)
@@ -34,7 +33,6 @@ for item in [
     TestRailCase,
     TestRailCaseField,
     TestRailCaseType,
-    TestRailCaseFieldType
 ]:
     item.__test__ = False
 
@@ -140,7 +138,7 @@ def get_case_fields_response():
         "label": FIELD("word"),
         "name": prop_name,
         "system_name": f"custom_{prop_name}",
-        "type_id": TestRailCaseFieldType.TEXT.value
+        "type_id": TestRailCaseField.TestRailCaseFieldType.TEXT.value
     })
     return schema.create(iterations=2)
 
